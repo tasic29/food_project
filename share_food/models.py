@@ -7,7 +7,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 
-class User(models.Model):
+class UserProfile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     location = models.CharField(max_length=300)
@@ -70,7 +70,7 @@ class FoodItem(models.Model):
         default=timezone.now() + timedelta(days=3))
     image = models.ImageField(
         blank=True, null=True, upload_to='images')
-    owner = models.ForeignKey(User, on_delete=models.PROTECT)
+    owner = models.ForeignKey(UserProfile, on_delete=models.PROTECT)
 
     def __str__(self) -> str:
         return self.title
@@ -90,9 +90,9 @@ class Transaction(models.Model):
     food_item = models.ForeignKey(
         FoodItem, on_delete=models.PROTECT, related_name='transactions')
     food_giver = models.ForeignKey(
-        User, on_delete=models.PROTECT, related_name='given_transactions')
+        UserProfile, on_delete=models.PROTECT, related_name='given_transactions')
     food_receiver = models.ForeignKey(
-        User, on_delete=models.PROTECT, related_name='received_transactions')
+        UserProfile, on_delete=models.PROTECT, related_name='received_transactions')
     created_at = models.DateTimeField(auto_now_add=True)
     pickup_time = models.DateTimeField()
     status = models.CharField(
@@ -111,7 +111,7 @@ class Review(models.Model):
     transaction = models.ForeignKey(
         Transaction, on_delete=models.CASCADE, related_name='reviews')
     reviewer = models.ForeignKey(
-        User, on_delete=models.PROTECT, related_name='reviews_r')
+        UserProfile, on_delete=models.PROTECT, related_name='reviews_r')
     rating = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)])
     comment = models.TextField(blank=True, null=True)
@@ -120,9 +120,9 @@ class Review(models.Model):
 
 class Message(models.Model):
     sender = models.ForeignKey(
-        User, on_delete=models.PROTECT, related_name='sent_messages')
+        UserProfile, on_delete=models.PROTECT, related_name='sent_messages')
     receiver = models.ForeignKey(
-        User, on_delete=models.PROTECT, related_name='received_messages')
+        UserProfile, on_delete=models.PROTECT, related_name='received_messages')
     content = models.TextField(max_length=500)
     sent_at = models.DateTimeField(auto_now_add=True)
 
@@ -149,7 +149,7 @@ class Notification(models.Model):
     ]
 
     recipient = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='notifications')
+        UserProfile, on_delete=models.CASCADE, related_name='notifications')
     notification_type = models.CharField(
         max_length=50, choices=NOTIFICATION_TYPE_CHOICES)
     message = models.TextField(default='')
