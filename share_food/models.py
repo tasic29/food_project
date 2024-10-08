@@ -1,5 +1,8 @@
+from django.utils import timezone
+from datetime import timedelta
 from django.contrib import admin
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
@@ -63,7 +66,8 @@ class FoodItem(models.Model):
         max_length=50, choices=CATEGORY_CHOICES, default=CATEGORY_OTHER)
     is_available = models.BooleanField(default=True)
     pickup_location = models.CharField(max_length=300)
-    available_until = models.DateTimeField(auto_now_add=True)
+    available_until = models.DateTimeField(
+        default=timezone.now() + timedelta(days=3))
     image = models.ImageField(
         blank=True, null=True, upload_to='images')
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
@@ -96,6 +100,12 @@ class Transaction(models.Model):
     rating_given = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)], null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+        if self.food_giver == self.food_receiver:
+            raise ValidationError(
+                'The food giver and receiver can not be the same person')
+        super().save(*args, **kwargs)
+
 
 class Review(models.Model):
     transaction = models.ForeignKey(
@@ -115,6 +125,12 @@ class Message(models.Model):
         User, on_delete=models.PROTECT, related_name='received_messages')
     content = models.TextField(max_length=500)
     sent_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if self.sender == self.receiver:
+            raise ValidationError(
+                'Message sender and receiver can not be the same person')
+        super().save(*args, **kwargs)
 
 
 class Notification(models.Model):
