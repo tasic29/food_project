@@ -18,6 +18,9 @@ from django.contrib import admin
 from django.urls import path
 from debug_toolbar.toolbar import debug_toolbar_urls
 
+admin.site.site_header = 'Social Food Sharing Movement'
+admin.site.index_title = 'Food Sharing Admin'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 ] + debug_toolbar_urls()

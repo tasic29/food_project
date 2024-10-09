@@ -38,3 +38,51 @@ class FoodItemAdmin(admin.ModelAdmin):
     list_per_page = 10
     search_fields = ['title', 'category']
     list_filter = ['category', 'is_available']
+
+
+@admin.register(Transaction)
+class TransactionAdmin(admin.ModelAdmin):
+    autocomplete_fields = ['food_item', 'food_giver', 'food_receiver']
+    list_display = ['id', 'food_item', 'food_giver', 'food_receiver',
+                    'created_at', 'pickup_time', 'status', 'rating_given']
+    list_filter = ['status']
+    search_fields = ['food_item__title', 'food_giver__user__first_name', 'food_giver__user__last_name',
+                     'food_receiver__user__first_name', 'food_receiver__user__last_name']
+    list_per_page = 10
+    list_editable = ['status', 'pickup_time']
+
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    autocomplete_fields = ['reviewer']
+    list_display = ['id', 'transaction', 'reviewer',
+                    'rating', 'comment', 'created_at']
+    list_filter = [RatingFilter]
+    list_select_related = [
+        'transaction',
+        'transaction__food_item',
+        'transaction__food_giver',
+        'transaction__food_receiver',
+        'reviewer__user'
+    ]
+
+
+@admin.register(Message)
+class MessageAdmin(admin.ModelAdmin):
+    autocomplete_fields = ['sender']
+    list_display = ['id', 'sender', 'receiver', 'content', 'sent_at']
+    list_select_related = ['sender', 'receiver']
+    search_fields = [
+        'sender__user__first_name',
+        'sender__user__last_name',
+        'receiver__user__first_name',
+        'receiver__user__last_name',
+    ]
+
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    autocomplete_fields = ['recipient']
+    list_display = ['id', 'recipient', 'notification_type',
+                    'message', 'is_read', 'created_at']
+    list_filter = ['is_read']

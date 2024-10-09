@@ -31,6 +31,8 @@ class UserProfile(models.Model):
 
     class Meta:
         ordering = ['user__first_name', 'user__last_name']
+        verbose_name = 'User Profile'
+        verbose_name_plural = 'User Profiles'
 
 
 class FoodItem(models.Model):
@@ -100,11 +102,18 @@ class Transaction(models.Model):
     rating_given = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)], null=True, blank=True)
 
-    def save(self, *args, **kwargs):
+    def clean(self):
         if self.food_giver == self.food_receiver:
             raise ValidationError(
-                'The food giver and receiver can not be the same person')
+                'The food giver and receiver cannot be the same person')
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
         super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return f'{self.food_item} - {self.food_giver} to {self.food_receiver}'
 
 
 class Review(models.Model):
@@ -126,10 +135,14 @@ class Message(models.Model):
     content = models.TextField(max_length=500)
     sent_at = models.DateTimeField(auto_now_add=True)
 
-    def save(self, *args, **kwargs):
+    def clean(self):
         if self.sender == self.receiver:
             raise ValidationError(
                 'Message sender and receiver can not be the same person')
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
         super().save(*args, **kwargs)
 
 
