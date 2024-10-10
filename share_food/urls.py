@@ -4,6 +4,8 @@ from . import views
 
 router = DefaultRouter()
 router.register('food-items', views.FoodItemViewSet, basename='food-item')
+router.register('transactions', views.TransactionViewSet,
+                basename='transaction')
 
 urlpatterns = [
     path('profile/', views.UserProfileListView.as_view()),

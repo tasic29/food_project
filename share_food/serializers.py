@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import FoodItem, UserProfile
+from .models import FoodItem, Transaction, UserProfile
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -17,16 +17,26 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class FoodItemSerializer(serializers.ModelSerializer):
-    owner_id = serializers.IntegerField(read_only=True)
+    # owner_id = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = FoodItem
         fields = ['id', 'title', 'description', 'category', 'is_available',
-                  'pickup_location', 'available_until', 'image', 'owner_id']
-
-    def create(self, validated_data):
-        owner_id = self.context['owner_id']
-        return FoodItem.objects.create(owner_id=owner_id, **validated_data)
+                  'pickup_location', 'available_until', 'image']
 
 
-# class TransactionSerializer
+class TransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transaction
+        fields = ['food_item', 'food_receiver',
+                  'pickup_time', 'status', 'rating_given']
+
+    def validate(self, data):
+        request = self.context.get('request')
+        food_giver = request.user.userprofile
+
+        if food_giver == data.get('food_receiver'):
+            raise serializers.ValidationError(
+                'The food giver and receiver cannot be the same person.'
+            )
+        return data
