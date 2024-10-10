@@ -24,7 +24,7 @@ class RatingFilter(admin.SimpleListFilter):
 class UserAdmin(admin.ModelAdmin):
     autocomplete_fields = ['user']
     list_display = ['id', 'first_name', 'last_name', 'location', 'rating']
-    list_per_page = 10
+    # list_per_page = 10
     list_filter = [RatingFilter]
     search_fields = ['user__first_name', 'user__last_name']
     list_select_related = ['user']
