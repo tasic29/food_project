@@ -9,6 +9,8 @@ pillow = "*"
 mysqlclient = "*"
 django-debug-toolbar = "*"
 djangorestframework = "*"
+djoser = "*"
+djangorestframework-simplejwt = "*"
 
 [dev-packages]
 

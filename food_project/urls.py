@@ -24,5 +24,7 @@ admin.site.index_title = 'Food Sharing Admin'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
-    path('share/', include('share_food.urls'))
+    path('auth/', include('djoser.urls')),
+    path('auth/', include('djoser.urls.jwt')),
+    path('share/', include('share_food.urls')),
 ] + debug_toolbar_urls()
