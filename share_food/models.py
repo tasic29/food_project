@@ -63,6 +63,9 @@ class FoodItem(models.Model):
         (CATEGORY_OTHER, 'Other'),
     ]
 
+    def default_available_until(self):
+        return timezone.now() + timedelta(days=3)
+
     title = models.CharField(max_length=255)
     description = models.TextField()
     category = models.CharField(
@@ -70,7 +73,7 @@ class FoodItem(models.Model):
     is_available = models.BooleanField(default=True)
     pickup_location = models.CharField(max_length=300)
     available_until = models.DateTimeField(
-        default=timezone.now() + timedelta(days=3))
+        default=default_available_until)
     image = models.ImageField(
         blank=True, null=True, upload_to='images')
     owner = models.ForeignKey(UserProfile, on_delete=models.PROTECT)
@@ -121,7 +124,7 @@ class Review(models.Model):
     transaction = models.ForeignKey(
         Transaction, on_delete=models.CASCADE, related_name='reviews')
     reviewer = models.ForeignKey(
-        UserProfile, on_delete=models.PROTECT, related_name='reviews_r')
+        UserProfile, on_delete=models.PROTECT, related_name='written_reviews')
     rating = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)])
     comment = models.TextField(blank=True, null=True)
