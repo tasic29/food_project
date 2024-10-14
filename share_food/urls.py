@@ -1,15 +1,27 @@
-from django.urls import path
-from rest_framework.routers import DefaultRouter
+from django.urls import path, include
+from rest_framework_nested import routers
 from . import views
 
-router = DefaultRouter()
+
+# class APIRootView()
+
+
+router = routers.DefaultRouter()
+
 router.register('food-items', views.FoodItemViewSet, basename='food-item')
 router.register('transactions', views.TransactionViewSet,
                 basename='transaction')
 
+transactions_router = routers.NestedSimpleRouter(
+    router, 'transactions', lookup='transaction')
+transactions_router.register('reviews', views.ReviewViewSet, basename='review')
+
 urlpatterns = [
-    path('profile/', views.UserProfileListView.as_view()),
-    path('profile/<int:pk>', views.UserProfileDetailView.as_view()),
+    path('profiles/', views.UserProfileListView.as_view()),
+    path('profiles/<int:pk>', views.UserProfileDetailView.as_view()),
+    path('', include(router.urls)),
+    path('', include(transactions_router.urls)),
 ]
 
 urlpatterns += router.urls
+urlpatterns += transactions_router.urls

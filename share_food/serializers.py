@@ -48,6 +48,24 @@ class TransactionSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    reviewer_id = serializers.IntegerField(read_only=True)
+    transaction_id = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = Review
-        fields = ['transaction', 'reviewer', 'rating', 'comment']
+        fields = ['id', 'transaction_id', 'reviewer_id', 'rating', 'comment']
+
+    def validate(self, attrs):
+        if not self.context.get('reviewer_id') or not self.context.get('transaction_id'):
+            raise serializers.ValidationError(
+                'Missing reviewer or transaction information. Are you logged in?')
+        return attrs
+
+    def create(self, validated_data):
+        reviewer_id = self.context['reviewer_id']
+        transaction_id = self.context['transaction_id']
+        return Review.objects.create(
+            reviewer_id=reviewer_id,
+            transaction_id=transaction_id,
+            **validated_data
+        )

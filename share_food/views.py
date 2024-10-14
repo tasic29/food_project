@@ -1,4 +1,5 @@
 from rest_framework import permissions
+from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, GenericAPIView
@@ -12,9 +13,20 @@ class UserProfileListView(ListAPIView, RetrieveUpdateAPIView, GenericAPIView):
     serializer_class = UserProfileSerializer
 
 
-class UserProfileDetailView(RetrieveUpdateAPIView):
+class UserProfileDetailView(RetrieveUpdateAPIView, GenericAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
+
+
+# class UserProfileViewSet(viewsets.ViewSet):
+
+#     def list(self, request):
+#         view = UserProfileListView.as_view()
+#         return view(request)
+
+#     def retrieve(self, request, pk=None):
+#         view = UserProfileDetailView.as_view()
+#         return view(request, pk=pk)
 
 
 class FoodItemViewSet(ModelViewSet):
@@ -38,5 +50,15 @@ class TransactionViewSet(ModelViewSet):
 
 
 class ReviewViewSet(ModelViewSet):
-    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Review.objects.select_related('reviewer').filter(transaction_id=self.kwargs['transaction_pk'])
+
+    def get_serializer_context(self):
+        print(self.request.user.id)
+        return {
+            'reviewer_id': self.request.user.userprofile.id,
+            'transaction_id': self.kwargs['transaction_pk'],
+        }
