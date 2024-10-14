@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import FoodItem, Transaction, UserProfile
+from .models import FoodItem, Review, Transaction, UserProfile
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -26,17 +26,28 @@ class FoodItemSerializer(serializers.ModelSerializer):
 
 
 class TransactionSerializer(serializers.ModelSerializer):
+    food_giver_id = serializers.IntegerField(read_only=True)
+    food_receiver_id = serializers.IntegerField()
+
     class Meta:
         model = Transaction
-        fields = ['food_item', 'food_receiver',
-                  'pickup_time', 'status', 'rating_given']
+        fields = ['id', 'food_item', 'food_giver_id', 'food_receiver_id',
+                  'created_at', 'pickup_time', 'status', 'rating_given']
+
+    def create(self, validated_data):
+        food_giver = self.context['food_giver']
+        validated_data.pop('food_giver_id', None)
+        return Transaction.objects.create(food_giver=food_giver, **validated_data)
 
     def validate(self, data):
-        request = self.context.get('request')
-        food_giver = request.user.userprofile
-
-        if food_giver == data.get('food_receiver'):
+        food_giver = self.context['food_giver']
+        if food_giver == data['food_receiver_id']:
             raise serializers.ValidationError(
-                'The food giver and receiver cannot be the same person.'
-            )
+                'Food giver and receiver cannot be the same person.')
         return data
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ['transaction', 'reviewer', 'rating', 'comment']

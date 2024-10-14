@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, GenericAPIView
 
-from .serializers import FoodItemSerializer, TransactionSerializer, UserProfileSerializer
-from .models import FoodItem, Transaction, UserProfile
+from .serializers import FoodItemSerializer, ReviewSerializer, TransactionSerializer, UserProfileSerializer
+from .models import FoodItem, Review, Transaction, UserProfile
 
 
 class UserProfileListView(ListAPIView, RetrieveUpdateAPIView, GenericAPIView):
@@ -31,5 +31,12 @@ class TransactionViewSet(ModelViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
 
-    def perform_create(self, serializer):
-        serializer.save(food_giver=self.request.user.userprofile)
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['food_giver'] = self.request.user.userprofile
+        return context
+
+
+class ReviewViewSet(ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer

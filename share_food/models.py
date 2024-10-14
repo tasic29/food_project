@@ -1,4 +1,5 @@
 from django.utils import timezone
+from django.contrib.auth.models import User
 from datetime import timedelta
 from django.contrib import admin
 from django.conf import settings
