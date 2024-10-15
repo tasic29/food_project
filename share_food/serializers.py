@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import FoodItem, Review, Transaction, UserProfile
+from .models import FoodItem, Notification, Review, Transaction, UserProfile, Message
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -69,3 +69,34 @@ class ReviewSerializer(serializers.ModelSerializer):
             transaction_id=transaction_id,
             **validated_data
         )
+
+
+class MessageSerializer(serializers.ModelSerializer):
+    sender_id = serializers.IntegerField(read_only=True)
+    receiver_id = serializers.IntegerField()
+
+    class Meta:
+        model = Message
+        fields = ['id', 'sender_id', 'receiver_id', 'content']
+
+    def create(self, validated_data):
+        sender_id = self.context['sender_id']
+        if sender_id == validated_data.get('receiver_id'):
+            raise serializers.ValidationError(
+                'Message sender and receiver cannot be the same person.')
+        message = Message.objects.create(sender_id=sender_id, **validated_data)
+
+        # create Notification
+        Notification.objects.create(
+            recipient=message.receiver,
+            notification_type=Notification.NOTIFICATION_TYPE_NEW_MESSAGE,
+            message=f'{message.sender.user.first_name} {
+                message.sender.user.last_name} sent you a new message.'
+        )
+        return message
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ['id', 'recipient', 'notification_type', 'message', 'is_read']

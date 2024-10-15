@@ -139,15 +139,15 @@ class Message(models.Model):
     content = models.TextField(max_length=500)
     sent_at = models.DateTimeField(auto_now_add=True)
 
-    def clean(self):
-        if self.sender == self.receiver:
-            raise ValidationError(
-                'Message sender and receiver can not be the same person')
-        super().clean()
+    # def clean(self):
+    #     if self.sender == self.receiver:
+    #         raise ValidationError(
+    #             'Message sender and receiver can not be the same person')
+    #     super().clean()
 
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     self.full_clean()
+    #     super().save(*args, **kwargs)
 
 
 class Notification(models.Model):
@@ -168,7 +168,7 @@ class Notification(models.Model):
     recipient = models.ForeignKey(
         UserProfile, on_delete=models.CASCADE, related_name='notifications')
     notification_type = models.CharField(
-        max_length=50, choices=NOTIFICATION_TYPE_CHOICES)
+        max_length=50, choices=NOTIFICATION_TYPE_CHOICES, default=NOTIFICATION_TYPE_NEW_MESSAGE)
     message = models.TextField(default='')
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

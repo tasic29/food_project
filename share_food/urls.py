@@ -3,14 +3,14 @@ from rest_framework_nested import routers
 from . import views
 
 
-# class APIRootView()
-
-
 router = routers.DefaultRouter()
 
 router.register('food-items', views.FoodItemViewSet, basename='food-item')
 router.register('transactions', views.TransactionViewSet,
                 basename='transaction')
+router.register('messages', views.MessageViewSet, basename='message')
+router.register('notifications', views.NotificationViewSet,
+                basename='notification')
 
 transactions_router = routers.NestedSimpleRouter(
     router, 'transactions', lookup='transaction')

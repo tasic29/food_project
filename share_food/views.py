@@ -1,11 +1,11 @@
 from rest_framework import permissions
 from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, GenericAPIView
 
-from .serializers import FoodItemSerializer, ReviewSerializer, TransactionSerializer, UserProfileSerializer
-from .models import FoodItem, Review, Transaction, UserProfile
+from .serializers import FoodItemSerializer, MessageSerializer, NotificationSerializer, ReviewSerializer, TransactionSerializer, UserProfileSerializer
+from .models import FoodItem, Notification, Review, Transaction, UserProfile, Message
 
 
 class UserProfileListView(ListAPIView, RetrieveUpdateAPIView, GenericAPIView):
@@ -16,17 +16,6 @@ class UserProfileListView(ListAPIView, RetrieveUpdateAPIView, GenericAPIView):
 class UserProfileDetailView(RetrieveUpdateAPIView, GenericAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
-
-
-# class UserProfileViewSet(viewsets.ViewSet):
-
-#     def list(self, request):
-#         view = UserProfileListView.as_view()
-#         return view(request)
-
-#     def retrieve(self, request, pk=None):
-#         view = UserProfileDetailView.as_view()
-#         return view(request, pk=pk)
 
 
 class FoodItemViewSet(ModelViewSet):
@@ -62,3 +51,22 @@ class ReviewViewSet(ModelViewSet):
             'reviewer_id': self.request.user.userprofile.id,
             'transaction_id': self.kwargs['transaction_pk'],
         }
+
+
+class MessageViewSet(ModelViewSet):
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_context(self):
+        return {
+            'sender_id': self.request.user.userprofile.id,
+        }
+
+
+class NotificationViewSet(ReadOnlyModelViewSet):
+    serializer_class = NotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Notification.objects.filter(recipient=self.request.user.userprofile)
