@@ -1,55 +1,88 @@
 from rest_framework import permissions
 
 
-class IsAdminOrReadOnly(permissions.BasePermission):
+class IsAdminOrOwner(permissions.BasePermission):
     '''
-    Only authenticated users and admins can access the API.
-    Admins can perform all actions.
-    '''
-
-    def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        return bool(request.user and request.user.is_staff)
-
-
-class IsOwnerOrReadOnly(permissions.BasePermission):
-    '''
-    Only authenticated users and admins can access the user profile.
-    Admins can modify profiles, while authenticated users can modify their own profiles.
+    Allows authenticated users to list and view profiles.
+    Only admins and owners can update or delete their own profiles.
     '''
 
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
-        if request.method == 'POST':
-            return False
         return bool(request.user and request.user.is_authenticated)
 
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
-        return obj.user == request.user or obj.user.is_staff
+
+        if request.user.is_staff:
+            return True
+
+        return obj.user == request.user
 
 
-# class IsOwnerOrReadOnly(permissions.BasePermission):
-#     '''
-#     Only authenticated users and admins can access the user profile.
-#     Admins can modify profiles, while authenticated users can modify their own profiles.
-#     '''
+class IsOwnerOrReadOnly(permissions.BasePermission):
 
-#     def has_permission(self, request, view):
-#         # Allow read-only actions for everyone
-#         if request.method in permissions.SAFE_METHODS:
-#             return True
+    def has_permission(self, request, view):
+        if request.method in ['GET', 'POST']:
+            return True
+        return bool(request.user and request.user.is_authenticated)
 
-#         # Allow authenticated users to perform write actions
-#         return bool(request.user and request.user.is_authenticated)
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        if request.user.is_staff:
+            return True
 
-#     def has_object_permission(self, request, view, obj):
-#         # Allow read-only actions for everyone
-#         if request.method in permissions.SAFE_METHODS:
-#             return True
+        user = getattr(obj, 'user', None)
+        if user is None:
+            user = getattr(obj, 'owner', None) and getattr(
+                obj.owner, 'user', None)
 
-#         # Allow the user to modify their own profile or admin to modify any profile
-#         return obj.user == request.user or request.user.is_staff
+        return user == request.user
+
+
+class TransactionPermission(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return bool(request.user and request.user.is_authenticated)
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        if request.user.is_staff:
+            return True
+        return obj.food_giver.user == request.user
+
+
+class ReviewPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return bool(request.user and request.user.is_authenticated)
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in ['GET', 'POST']:
+            return True
+        if request.user.is_staff:
+            return True
+        if request.method in ['PUT', 'DELETE']:
+            return obj.reviewer.user == request.user
+
+
+class MessagePermission(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return bool(request.user and request.user.is_authenticated)
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return obj.sender.user == request.user or obj.receiver.user == request.user or request.user.is_staff
+        if request.user.is_staff:
+            return True
+        return obj.sender.user == request.user

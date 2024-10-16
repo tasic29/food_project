@@ -5,7 +5,8 @@ from . import views
 
 router = routers.DefaultRouter()
 
-router.register('profiles', views.UserProfileViewSet, basename='userprofile')
+router.register('user-profiles', views.UserProfileViewSet,
+                basename='userprofile')
 router.register('food-items', views.FoodItemViewSet, basename='food-item')
 router.register('transactions', views.TransactionViewSet,
                 basename='transaction')

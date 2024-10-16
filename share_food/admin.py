@@ -28,7 +28,8 @@ def reset_rating(model_admin,   request, queryset):
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     autocomplete_fields = ['user']
-    list_display = ['id', 'first_name', 'last_name', 'location', 'rating']
+    list_display = ['id', 'user__username', 'user__first_name',
+                    'user__last_name', 'location', 'rating']
     # list_per_page = 10
     list_filter = [RatingFilter]
     search_fields = ['user__first_name', 'user__last_name']
@@ -56,6 +57,7 @@ class TransactionAdmin(admin.ModelAdmin):
                      'food_receiver__user__first_name', 'food_receiver__user__last_name']
     list_per_page = 10
     list_editable = ['status', 'pickup_time']
+    actions = [reset_rating]
 
 
 @admin.register(Review)
