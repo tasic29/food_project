@@ -1,21 +1,46 @@
-from rest_framework import permissions
-from rest_framework import viewsets
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
+from rest_framework.decorators import action, api_view
+from rest_framework import status
 from rest_framework.response import Response
+from rest_framework import permissions
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
-from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, GenericAPIView
+from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
+from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
 
-from .serializers import FoodItemSerializer, MessageSerializer, NotificationSerializer, ReviewSerializer, TransactionSerializer, UserProfileSerializer
-from .models import FoodItem, Notification, Review, Transaction, UserProfile, Message
+from .serializers import (FoodItemSerializer,
+                          MessageSerializer,
+                          NotificationSerializer,
+                          ReviewSerializer,
+                          TransactionSerializer,
+                          UserProfileSerializer)
+from .models import (FoodItem,
+                     Notification,
+                     Review,
+                     Transaction,
+                     UserProfile,
+                     Message)
 
 
-class UserProfileListView(ListAPIView, RetrieveUpdateAPIView, GenericAPIView):
+class UserProfileViewSet(ModelViewSet):
     queryset = UserProfile.objects.select_related('user').all()
     serializer_class = UserProfileSerializer
+    permission_classes = [IsOwnerOrReadOnly]
 
-
-class UserProfileDetailView(RetrieveUpdateAPIView, GenericAPIView):
-    queryset = UserProfile.objects.all()
-    serializer_class = UserProfileSerializer
+    @action(detail=False, methods=['GET', 'PUT', 'DELETE'])
+    def me(self, request):
+        owner = UserProfile.objects.get(user_id=request.user.id)
+        if request.method == 'GET':
+            serializer = UserProfileSerializer(owner)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        elif request.method == 'PUT':
+            serializer = UserProfileSerializer(owner, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        elif request.method == 'DELETE':
+            owner.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class FoodItemViewSet(ModelViewSet):
@@ -57,6 +82,10 @@ class MessageViewSet(ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user_profile = self.request.user.userprofile
+        return Message.objects.filter(Q(sender=user_profile) | Q(receiver=user_profile))
 
     def get_serializer_context(self):
         return {

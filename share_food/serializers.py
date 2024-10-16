@@ -17,12 +17,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class FoodItemSerializer(serializers.ModelSerializer):
-    # owner_id = serializers.IntegerField(read_only=True)
+    owner_id = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = FoodItem
         fields = ['id', 'title', 'description', 'category', 'is_available',
-                  'pickup_location', 'available_until', 'image']
+                  'pickup_location', 'available_until', 'image', 'owner_id']
 
 
 class TransactionSerializer(serializers.ModelSerializer):

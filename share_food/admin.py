@@ -20,14 +20,20 @@ class RatingFilter(admin.SimpleListFilter):
         return queryset
 
 
+@admin.action(description='Reset the rating')
+def reset_rating(model_admin,   request, queryset):
+    queryset.update(rating=0)
+
+
 @admin.register(UserProfile)
-class UserAdmin(admin.ModelAdmin):
+class UserProfileAdmin(admin.ModelAdmin):
     autocomplete_fields = ['user']
     list_display = ['id', 'first_name', 'last_name', 'location', 'rating']
     # list_per_page = 10
     list_filter = [RatingFilter]
     search_fields = ['user__first_name', 'user__last_name']
     list_select_related = ['user']
+    actions = [reset_rating]
 
 
 @admin.register(FoodItem)

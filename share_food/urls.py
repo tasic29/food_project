@@ -5,6 +5,7 @@ from . import views
 
 router = routers.DefaultRouter()
 
+router.register('profiles', views.UserProfileViewSet, basename='userprofile')
 router.register('food-items', views.FoodItemViewSet, basename='food-item')
 router.register('transactions', views.TransactionViewSet,
                 basename='transaction')
@@ -17,8 +18,8 @@ transactions_router = routers.NestedSimpleRouter(
 transactions_router.register('reviews', views.ReviewViewSet, basename='review')
 
 urlpatterns = [
-    path('profiles/', views.UserProfileListView.as_view()),
-    path('profiles/<int:pk>', views.UserProfileDetailView.as_view()),
+    # path('profiles/', views.UserProfileViewSet.as_view()),
+    # path('profiles/<int:pk>', views.UserProfileDetailView.as_view()),
     path('', include(router.urls)),
     path('', include(transactions_router.urls)),
 ]

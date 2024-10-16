@@ -168,7 +168,7 @@ class Notification(models.Model):
     recipient = models.ForeignKey(
         UserProfile, on_delete=models.CASCADE, related_name='notifications')
     notification_type = models.CharField(
-        max_length=50, choices=NOTIFICATION_TYPE_CHOICES, default=NOTIFICATION_TYPE_NEW_MESSAGE)
+        max_length=50, choices=NOTIFICATION_TYPE_CHOICES)
     message = models.TextField(default='')
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
