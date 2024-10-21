@@ -2,7 +2,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.decorators import action, api_view
+from rest_framework.decorators import action
 from rest_framework import status
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.response import Response
@@ -11,6 +11,7 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
 from .permissions import IsAdminOrOwner, IsOwnerOrReadOnly, MessagePermission, ReviewPermission, TransactionPermission
 
+from .pagination import Defaultpagination
 from .serializers import (FoodItemSerializer,
                           MessageSerializer,
                           NotificationSerializer,
@@ -32,6 +33,7 @@ class UserProfileViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     ordering_fields = ['id']
     search_fields = ['user__first_name', 'user__last_name']
+    pagination_class = Defaultpagination
 
     @action(detail=False, methods=['GET', 'PUT', 'DELETE'])
     def me(self, request):
@@ -59,6 +61,7 @@ class FoodItemViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     ordering_fields = ['id', 'title', 'is_available', 'available_until']
     search_fields = ['title', 'category']
+    pagination_class = Defaultpagination
 
     def perform_create(self, serializer):
         user_profile = UserProfile.objects.get(user=self.request.user)
@@ -72,6 +75,7 @@ class TransactionViewSet(ModelViewSet):
     ordering_fields = ['id', 'status']
     search_fields = ['food_item__title', 'food_giver__user__first_name', 'food_giver__user__last_name',
                      'food_receiver__user__first_name', 'food_receiver__user__last_name']
+    pagination_class = Defaultpagination
 
     def get_queryset(self):
         if self.request.method == 'GET':
@@ -90,6 +94,7 @@ class ReviewViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     ordering_fields = ['id', 'created_at']
     search_fields = ['reviewer__user__first_name', 'reviewer__user__last_name']
+    pagination_class = Defaultpagination
 
     def get_queryset(self):
         return Review.objects.select_related('reviewer').filter(transaction_id=self.kwargs['transaction_pk'])
@@ -108,6 +113,7 @@ class MessageViewSet(ModelViewSet):
     ordering_fields = ['id', 'sent_at']
     search_fields = ['sender__user__first_name', 'sender__user__last_name',
                      'receiver__user__first_name', 'receiver__user__last_name']
+    pagination_class = Defaultpagination
 
     def get_queryset(self):
         user_profile = self.request.user.userprofile
