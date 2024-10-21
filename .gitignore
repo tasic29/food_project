@@ -1,1 +1,3 @@
 *.sql
+images/
+__pycache__/

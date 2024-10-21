@@ -14,7 +14,7 @@ class UserProfile(models.Model):
     location = models.CharField(max_length=300)
     phone_number = models.CharField(max_length=150)
     profile_picture = models.ImageField(
-        blank=True, null=True, upload_to='images')
+        blank=True, null=True, upload_to='share_food/images')
     bio = models.TextField(blank=True, null=True)
     rating = models.FloatField(
         validators=[MinValueValidator(1), MaxValueValidator(5)], blank=True, null=True, default=None)
@@ -75,7 +75,7 @@ class FoodItem(models.Model):
     available_until = models.DateTimeField(
         default=default_available_until)
     image = models.ImageField(
-        blank=True, null=True, upload_to='images')
+        blank=True, null=True, upload_to='share_food/images')
     owner = models.ForeignKey(UserProfile, on_delete=models.PROTECT)
 
     def __str__(self) -> str:

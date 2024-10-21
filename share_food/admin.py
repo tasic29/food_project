@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from .models import UserProfile, FoodItem, Transaction, Review, Message, Notification
 
 
@@ -8,8 +9,8 @@ class RatingFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         return [
-            ('>4', '4+   stars'),
-            ('<4', '4-   stars')
+            ('>4', '4+ stars'),
+            ('<4', '4- stars')
         ]
 
     def queryset(self, request, queryset):
@@ -21,20 +22,28 @@ class RatingFilter(admin.SimpleListFilter):
 
 
 @admin.action(description='Reset the rating')
-def reset_rating(model_admin,   request, queryset):
-    queryset.update(rating=0)
+def reset_rating(model_admin, request, queryset):
+    updated_rating = queryset.update(rating=0)
+    model_admin.message_user(request, f'Rating was successfully updated')
 
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     autocomplete_fields = ['user']
-    list_display = ['id', 'user__username', 'user__first_name',
+    list_display = ['id', 'thumbnail', 'user__username', 'user__first_name',
                     'user__last_name', 'location', 'rating']
-    # list_per_page = 10
     list_filter = [RatingFilter]
     search_fields = ['user__first_name', 'user__last_name']
     list_select_related = ['user']
     actions = [reset_rating]
+    readonly_fields = ['thumbnail']
+
+    def thumbnail(self, obj):
+        if obj.profile_picture:
+            return format_html('<img src="{}" style="width: 60px; height: 60px; object-fit: cover;" />', obj.profile_picture.url)
+        return 'No Image Available'
+
+    thumbnail.short_description = 'Profile Picture'
 
 
 @admin.register(FoodItem)
