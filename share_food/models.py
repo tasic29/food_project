@@ -106,18 +106,18 @@ class Transaction(models.Model):
     rating_given = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)], null=True, blank=True)
 
-    def clean(self):
-        if self.food_giver == self.food_receiver:
-            raise ValidationError(
-                'The food giver and receiver cannot be the same person')
-        super().clean()
+    # def clean(self):
+    #     if self.food_giver == self.food_receiver:
+    #         raise ValidationError(
+    #             'The food giver and receiver cannot be the same person')
+    #     super().clean()
 
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     self.full_clean()
+    #     super().save(*args, **kwargs)
 
-    def __str__(self) -> str:
-        return f'{self.food_item} - {self.food_giver} to {self.food_receiver}'
+    # def __str__(self) -> str:
+    #     return f'{self.food_item} - {self.food_giver} to {self.food_receiver}'
 
 
 class Review(models.Model):

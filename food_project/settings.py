@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'debug_toolbar',
     'rest_framework',
+    'django_filters',
     'djoser',
     'rest_framework_simplejwt',
     'core',
@@ -154,5 +155,6 @@ SIMPLE_JWT = {
 DJOSER = {
     'SERIALIZERS': {
         'user_create': 'core.serializers.UserCreateSerializer',
+        'curent_user': 'core.serializers.UserSerializer',
     },
 }
