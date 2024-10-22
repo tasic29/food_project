@@ -49,11 +49,19 @@ class UserProfileAdmin(admin.ModelAdmin):
 @admin.register(FoodItem)
 class FoodItemAdmin(admin.ModelAdmin):
     autocomplete_fields = ['owner']
-    list_display = ['id', 'title', 'category',
+    list_display = ['id', 'thumbnail',  'title', 'category',
                     'is_available', 'pickup_location', 'available_until', 'owner']
     list_per_page = 10
     search_fields = ['title', 'category']
     list_filter = ['category', 'is_available']
+    readonly_fields = ['thumbnail']
+
+    def thumbnail(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" style="width: 60px; height: 60px; object-fit: cover;" />', obj.image.url)
+        return 'No Image Available'
+
+    thumbnail.short_description = 'Food Picture'
 
 
 @admin.register(Transaction)
