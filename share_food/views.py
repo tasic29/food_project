@@ -87,6 +87,20 @@ class TransactionViewSet(ModelViewSet):
         context['food_giver'] = self.request.user.userprofile
         return context
 
+    @action(detail=True, methods=['patch'], permission_classes=[TransactionPermission])
+    def rate(self, request, pk=None):
+        transaction = self.get_object()
+        if transaction.food_receiver != request.user.userprofile:
+            return Response({'detail': 'Only the receiver can give a rating.'}, status=403)
+
+        rating = request.data.get('rating')
+        if rating is None or not (1 <= int(rating) <= 5):
+            return Response({'detail': 'Rating must be between 1 and 5.'}, status=400)
+
+        transaction.rating_given = rating
+        transaction.save()
+        return Response({'status': 'Rating set', 'rating_given': rating})
+
 
 class ReviewViewSet(ModelViewSet):
     serializer_class = ReviewSerializer

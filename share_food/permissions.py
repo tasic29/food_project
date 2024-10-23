@@ -44,7 +44,6 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 
 
 class TransactionPermission(permissions.BasePermission):
-
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -55,6 +54,8 @@ class TransactionPermission(permissions.BasePermission):
             return True
         if request.user.is_staff:
             return True
+        if view.action == 'rate':
+            return obj.food_receiver.user == request.user
         return obj.food_giver.user == request.user
 
 

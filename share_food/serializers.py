@@ -1,3 +1,5 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
 from .models import FoodItem, Notification, Review, Transaction, UserProfile, Message
@@ -33,6 +35,7 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = Transaction
         fields = ['id', 'food_item', 'food_giver_id', 'food_receiver_id',
                   'created_at', 'pickup_time', 'status', 'rating_given']
+        read_only_fields = ['rating_given']
 
     def create(self, validated_data):
         food_giver = self.context['food_giver']
